@@ -4,25 +4,12 @@
 #include <ctype.h>
 
 #define MAX_NOMEARQ 256
+#define ENTRE(valor, min, max) (min <= valor && valor <= max)
 
-typedef
-    struct {
-        char* valor;
-        int tamanhoAlocado;
-    } string;
 
-/* FAZER AS FUNCOES DE STRING */
-
-/*string nova_string()*/
-
-/* aloca a string em outra parte da memoria com mais espaco */
-/* retorna NULL caso ocorra algum erro */
-/* caso contrario, retorna o novo endereco de memoria da string */
-/*char* aumentar_string(string str, float taxa_crescimento) {
-    if (taxa_crescimento <= 0 )
-        return NULL;
-
-}*/
+/* =========================================================== */
+/*                     FUNCOES AUXILIARES                      */
+/* =========================================================== */
 
 char terminar() {
     char resp;
@@ -31,11 +18,20 @@ char terminar() {
     return toupper(resp);
 }
 
-// 2x + 3yy + z + 44s = 2345
+
+/* =========================================================== */
+/*               FUNCOES PRINCIPAIS E FUNCAO MAIN              */
+/* =========================================================== */
+
 int main(void) {
     char nomeArq[MAX_NOMEARQ];
-    int qtdEquacoes;
+    char buffer[1024];
+    char caracterEmString[2];
+    char atual;
+    int qtdEquacoes, i, j;
     FILE* arq;
+
+    *(caracterEmString+1) = '\0'; /*usado posteriormente para concatenar chars a strings */
 
     printf("=============================================\n");
     printf(" Resolvedor de sistemas de equacoes lineares \n");
@@ -55,6 +51,26 @@ int main(void) {
         fscanf(arq, "%d", &qtdEquacoes);
         fgetc(arq); /* Le o caracter de nova linha */
 
+        double teste;
+        for (i=0; i<qtdEquacoes; i++) {
+            *(buffer) = '\0';
+
+            while (atual = fgetc(arq),
+                   ENTRE(atual, '0', '9') ||
+                   atual == '.') {
+                /* caso o programa esteja aqui, um numero
+                 * esta sendo lido */
+
+                *(caracterEmString)     = atual;
+                *(caracterEmString + 1) = '\0';
+                strcat(buffer, caracterEmString);
+            }
+
+            /* TODO: GUARDAR A VARIAVEL E SEU VALOR EM UM STRUCT DENTRO DE UMA LISTA */
+            teste = atof(buffer);
+        }
+
+        printf("%lf %s", teste, buffer);
 
 
         fclose(arq);
