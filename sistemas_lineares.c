@@ -68,7 +68,7 @@ void lista_inserir_inicio(Lista* lis, void* valor, size_t tamanho_valor) {
 
     if (lis->prim == NULL)
         lis->ult = novo;
-    
+
     lis->prim = novo;
 }
 
@@ -99,7 +99,7 @@ char lista_remover_primeiro(Lista* lis) {
         lis->ult = NULL;
 
     atual = lis->prim;
-    
+
     lis->prim = atual->prox;
     free(atual->info);
     free(atual);
@@ -109,7 +109,7 @@ char lista_remover_primeiro(Lista* lis) {
 char lista_remover_ultimo(Lista* lis) {
     No* atual;
     No* anterior;
-    
+
     if (lis->prim == NULL)
         return -1;
 
@@ -133,7 +133,7 @@ char lista_remover_ultimo(Lista* lis) {
     lis->ult = anterior;
     free(atual->info);
     free(atual);
-    
+
     return 1;
 }
 
@@ -146,7 +146,7 @@ char lista_remover_item(Lista* lis, int index) {
 
     if (index < 0)
         return -1;
-    
+
     if (index == 0)
         return lista_remover_primeiro(lis);
 
@@ -157,7 +157,7 @@ char lista_remover_item(Lista* lis, int index) {
         atual = atual->prox;
     }
 
-    if (atual == lis->ult) 
+    if (atual == lis->ult)
         lis->ult = anterior;
 
     anterior->prox = atual->prox;
@@ -193,6 +193,7 @@ int main(void) {
     char buffer[1024];
     char caracterEmString[2];
     char atual;
+    double numeroAtual;
     int qtdEquacoes, i, j;
     FILE* arq;
 
@@ -212,30 +213,60 @@ int main(void) {
             continue;
         }
 
+
         /* Lendo a quantidade de equacoes a ler */
         fscanf(arq, "%d", &qtdEquacoes);
         fgetc(arq); /* Le o caracter de nova linha */
 
-        double teste;
         for (i=0; i<qtdEquacoes; i++) {
             *(buffer) = '\0';
 
-            while (atual = fgetc(arq),
-                   ENTRE(atual, '0', '9') ||
-                   atual == '.') {
-                /* caso o programa esteja aqui, um numero
-                 * esta sendo lido */
+            // METODO ANTIGO
+            // while (atual = fgetc(arq),
+            //        ENTRE(atual, '0', '9') ||
+            //        atual == '.') {
+            //     /* caso o programa esteja aqui, um numero
+            //      * esta sendo lido */
 
-                *(caracterEmString)     = atual;
-                *(caracterEmString + 1) = '\0';
-                strcat(buffer, caracterEmString);
+            //     *(caracterEmString)     = atual;
+            //     *(caracterEmString + 1) = '\0';
+            //     strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+            // }
+
+            // if (*buffer == '\0')
+            //     numeroAtual = 1;
+            // else
+            //     numeroAtual = atof(buffer);
+            /* quando o programa chega aqui, deve-se ler o nome da variavel do numero lido */
+
+    
+            atual = fgetc(arq);
+            while (atual != '\n' && !feof(arq)) {
+                *(buffer) = '\0';
+                if (ENTRE(atual, '0', '9') || atual == '-' || atual == '+') {
+                    /* esta lendo um numero */
+                    ungetc(atual, arq);
+                    fscanf(arq, "%lf", &numeroAtual);
+                    printf("%lf\n", numeroAtual);
+                    atual = fgetc(arq);
+                }
+                else
+                if (atual != '=') {
+                    /* esta lendo um nome de variavel */
+                    ungetc(atual, arq);
+                    while (atual = fgetc(arq), atual != '+' && atual != '-' && atual != '=') {
+                        *(caracterEmString)     = atual;
+                        *(caracterEmString + 1) = '\0';
+                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+                        printf("%s", buffer);
+                    }
+                }
+
             }
 
-            /* TODO: GUARDAR A VARIAVEL E SEU VALOR EM UM STRUCT DENTRO DE UMA LISTA */
-            teste = atof(buffer);
         }
 
-        printf("%lf %s", teste, buffer);
+        //printf("%lf %s", numeroAtual, buffer);
 
 
         fclose(arq);
