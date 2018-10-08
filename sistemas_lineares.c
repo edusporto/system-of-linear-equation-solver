@@ -190,6 +190,7 @@ char terminar() {
 
 int main(void) {
     char nomeArq[MAX_NOMEARQ];
+    char linha[1024];
     char buffer[1024];
     char caracterEmString[2];
     char atual;
@@ -220,6 +221,27 @@ int main(void) {
 
         for (i=0; i<qtdEquacoes; i++) {
             *(buffer) = '\0';
+            *(linha)  = '\0';
+
+            while(atual = fgetc(arq), atual != '\n' && !feof(arq)) {
+                if (atual == ' ')
+                    continue;
+
+                *(caracterEmString)     = atual;
+                *(caracterEmString + 1) = '\0';
+
+                strncat(linha, caracterEmString, 1024 - strlen(linha));
+            }
+
+            int tamanhoLinha = strlen(linha);
+            for (j=0; j<tamanhoLinha; j++) {
+                atual = *(linha + j);
+
+                /* LER, A, PARTIR DE LINHA, SE O ATUAL EH NUMERO OU VARIAVEL OU TERMO INDEPENDENTE */
+                if ()
+            }
+
+        }
 
             // METODO ANTIGO
             // while (atual = fgetc(arq),
@@ -239,35 +261,34 @@ int main(void) {
             //     numeroAtual = atof(buffer);
             /* quando o programa chega aqui, deve-se ler o nome da variavel do numero lido */
 
-    
-            atual = fgetc(arq);
-            while (atual != '\n' && !feof(arq)) {
-                *(buffer) = '\0';
-                if (ENTRE(atual, '0', '9') || atual == '-' || atual == '+') {
-                    /* esta lendo um numero */
-                    ungetc(atual, arq);
-                    fscanf(arq, "%lf", &numeroAtual);
-                    printf("%lf\n", numeroAtual);
-                    atual = fgetc(arq);
-                }
-                else
-                if (atual != '=') {
-                    /* esta lendo um nome de variavel */
-                    ungetc(atual, arq);
-                    while (atual = fgetc(arq), atual != '+' && atual != '-' && atual != '=') {
-                        *(caracterEmString)     = atual;
-                        *(caracterEmString + 1) = '\0';
-                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
-                        printf("%s", buffer);
-                    }
-                }
 
-            }
+//            OUTRO METODO ANTIGO
+//            atual = fgetc(arq);
+//            while (atual != '\n' && !feof(arq)) {
+//                *(buffer) = '\0';
+//                if (ENTRE(atual, '0', '9') || atual == '-' || atual == '+') {
+//                    /* esta lendo um numero */
+//                    ungetc(atual, arq);
+//                    fscanf(arq, "%lf", &numeroAtual);
+//                    printf("%lf\n", numeroAtual);
+//                    atual = fgetc(arq);
+//                }
+//                else
+//                if (atual != '=') {
+//                    /* esta lendo um nome de variavel */
+//                    ungetc(atual, arq);
+//                    while (atual = fgetc(arq), atual != '+' && atual != '-' && atual != '=') {
+//                        *(caracterEmString)     = atual;
+//                        *(caracterEmString + 1) = '\0';
+//                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+//                        printf("%s", buffer);
+//                    }
+//                }
+//
+//            }
 
-        }
 
         //printf("%lf %s", numeroAtual, buffer);
-
 
         fclose(arq);
 
