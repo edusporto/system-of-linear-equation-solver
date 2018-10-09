@@ -272,20 +272,36 @@ int main(void) {
                         continue;
                     } else {
                         /* o coeficiente de uma nova incognite esta sendo lido */
-                        int tamanho_nome     = strlen(buffer)
+                        int tamanho_nome             = strlen(buffer)
                         incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
                         incognita_atual.tamanho_nome = tamanho_linha+1;
                         strcpy(incognita_atual.nome, buffer);
-                        lista_inserir_fim(equacoes, (void*)(&incognita_atual), sizeof(incognita_atual));
+                        lista_inserir_fim(equacoes+i, (void*)(&incognita_atual), sizeof(incognita_atual));
                         *(buffer) = '\0';
                         incognita_atual.nome = NULL;
 
                         *(caracterEmString)     = atual;
                         strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+                        continue;
                     }
                 }
 
-                /* FALTA FAZER CASO ESTEJA SENDO LIDO UM NOME OU O CARACTER DE IGUAL DA EQUACAO */
+                if (atual == '=') {
+                    /* o programa esta lendo o termo independente */
+                    int tamanho_nome             = strlen(buffer)
+                    incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
+                    incognita_atual.tamanho_nome = tamanho_linha+1;
+                    strcpy(incognita_atual.nome, buffer);
+                    lista_inserir_fim(equacoes+i, (void*)(&incognita_atual), sizeof(incognita_atual));
+                    *(buffer) = '\0';
+                    incognita_atual.nome = NULL + 1;
+                    continue;
+                }
+
+                /* FALTA LER O NOME DA INCOGNITA, TRATAR CASO NAO HA COEFICIENTE PARA UMA INCOGNITA */
+
+                /* o programa esta lendo o nome de uma incognita */
+                //incognita_atual.coeficiente = atof(buffer);
 
             }
 
