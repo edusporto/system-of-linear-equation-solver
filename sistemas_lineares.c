@@ -176,6 +176,18 @@ char lista_remover_item(Lista* lis, int index) {
 /*                 FUNCOES E STRUCTS AUXILIARES                */
 /* =========================================================== */
 
+typedef
+    struct {
+        char* nome;
+        size_t tamanho_nome;
+        double coeficiente;
+    } Incognita;
+
+Incognita incognita_new(char* nome, size_t tamanho_nome, double coeficiente) {
+    Incognite ret = {nome, tamanho_nome, coeficiente};
+    return ret;
+}
+
 char terminar() {
     char resp;
     printf("\nDeseja parar o programa? (S/N)\n");
@@ -194,9 +206,12 @@ int main(void) {
     char buffer[1024];
     char caracterEmString[2];
     char atual;
-    double numeroAtual;
+    //double numeroAtual;
+    double** m_coeficientes, m_termosIndependentes;
+    Lista* equacoes; /* eh um vetor */
     int qtdEquacoes, i, j;
     FILE* arq;
+    Incognita incognita_atual;
 
     *(caracterEmString+1) = '\0'; /*usado posteriormente para concatenar chars a strings */
 
@@ -219,6 +234,9 @@ int main(void) {
         fscanf(arq, "%d", &qtdEquacoes);
         fgetc(arq); /* Le o caracter de nova linha */
 
+        /* ALOCANDO MEMORIA PARA O VETOR DE LISTA QUE GUARDA AS INCOGNITAS */
+        equacoes = (Lista*)malloc(sizeof(Lista) * qtdEquacoes);
+
         for (i=0; i<qtdEquacoes; i++) {
             *(buffer) = '\0';
             *(linha)  = '\0';
@@ -233,12 +251,40 @@ int main(void) {
                 strncat(linha, caracterEmString, 1024 - strlen(linha));
             }
 
-            int tamanhoLinha = strlen(linha);
-            for (j=0; j<tamanhoLinha; j++) {
+            /* valores possiveis de incognita atual:
+             * nome == NULL, caso esteja sendo lida uma incognita nova
+             * nome == NULL + 1, caso um termo independente esteja sendo lido
+             * nome == algo, caso tenha terminado de ler o nome.
+                |-> Devera virar NULL ou NULL + 1 */
+            incognita_atual = incognita_new(NULL, 0, 0);
+
+            int tamanho_linha = strlen(linha);
+            for (j=0; j<tamanho_linha; j++) {
                 atual = *(linha + j);
 
-                /* LER, A, PARTIR DE LINHA, SE O ATUAL EH NUMERO OU VARIAVEL OU TERMO INDEPENDENTE */
-                if ()
+                if (ENTRE(atual, '0', '9') || atual == '.' ||
+                    atual == '+'           || atual == '-') {
+
+                    if (incognita_atual.nome == NULL || incognita_atual.nome == NULL + 1) {
+                        /* o coeficiente de uma incognita ou termo independente esta sendo lido */
+                        *(caracterEmString)     = atual;
+                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+                        continue;
+                    } else {
+                        /* o coeficiente de uma nova incognite esta sendo lido */
+                        int tamanho_nome     = strlen(buffer)
+                        incognita_atual.nome = (char*)malloc(tamanho_linha+1);
+                        strcpy(incognita_atual.nome, buffer);
+                        lista_inserir_fim(equacoes, (void*)(&incognita_atual), sizeof(incognita_atual));
+                        *(buffer) = '\0';
+
+                        *(caracterEmString)     = atual;
+                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
+                    }
+                }
+
+                /* FALTA FAZER CASO ESTEJA SENDO LIDO UM NOME OU O CARACTER DE IGUAL DA EQUACAO */
+
             }
 
         }
@@ -289,6 +335,11 @@ int main(void) {
 
 
         //printf("%lf %s", numeroAtual, buffer);
+
+
+
+        /* LEMBRAR DE DESALOCAR MEMORIA */
+        free(equacoes);
 
         fclose(arq);
 
