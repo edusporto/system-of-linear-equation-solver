@@ -273,10 +273,12 @@ int main(void) {
                     } else {
                         /* o coeficiente de uma nova incognite esta sendo lido */
                         int tamanho_nome     = strlen(buffer)
-                        incognita_atual.nome = (char*)malloc(tamanho_linha+1);
+                        incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
+                        incognita_atual.tamanho_nome = tamanho_linha+1;
                         strcpy(incognita_atual.nome, buffer);
                         lista_inserir_fim(equacoes, (void*)(&incognita_atual), sizeof(incognita_atual));
                         *(buffer) = '\0';
+                        incognita_atual.nome = NULL;
 
                         *(caracterEmString)     = atual;
                         strncat(buffer, caracterEmString, 1024 - strlen(buffer));
