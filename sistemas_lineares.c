@@ -184,7 +184,7 @@ typedef
     } Incognita;
 
 Incognita incognita_new(char* nome, size_t tamanho_nome, double coeficiente) {
-    Incognite ret = {nome, tamanho_nome, coeficiente};
+    Incognita ret = {nome, tamanho_nome, coeficiente};
     return ret;
 }
 
@@ -272,7 +272,7 @@ int main(void) {
                         continue;
                     } else {
                         /* o coeficiente de uma nova incognite esta sendo lido */
-                        int tamanho_nome             = strlen(buffer)
+                        int tamanho_nome             = strlen(buffer);
                         incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
                         incognita_atual.tamanho_nome = tamanho_linha+1;
                         strcpy(incognita_atual.nome, buffer);
@@ -288,7 +288,7 @@ int main(void) {
 
                 if (atual == '=') {
                     /* o programa esta lendo o termo independente */
-                    int tamanho_nome             = strlen(buffer)
+                    int tamanho_nome             = strlen(buffer);
                     incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
                     incognita_atual.tamanho_nome = tamanho_linha+1;
                     strcpy(incognita_atual.nome, buffer);
