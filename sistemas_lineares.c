@@ -192,6 +192,9 @@ int main(void) {
 
         equacoes = ler_equacoes(arq, qtdEquacoes);
 
+        /* O arquivo nao eh mais necessario, pode ser fechado */
+        fclose(arq);
+
         /* sera removido: escreve os valores das equacoes */
         No* at;
         for (i=0; i<qtdEquacoes; i++) {
@@ -202,10 +205,26 @@ int main(void) {
             }
         }
 
-        /* LEMBRAR DE DESALOCAR MEMORIA */
+
+
+        /* LIBERACAO DE MEMORIA */
+        Lista     lis_atual;
+        Incognita inc_atual;
+        No*       no_atual;
+        for (i=0; i<qtdEquacoes; i++) {
+            lis_atual = *(equacoes+i);
+            no_atual = lis_atual.prim;
+            while (no_atual != NULL) {
+                inc_atual = *(Incognita*)no_atual->info;
+                free(inc_atual.nome);
+                no_atual = no_atual->prox;
+            }
+            while (lista_remover_primeiro(&lis_atual) != -1)
+                ;
+            free(equacoes+i);
+        }
         free(equacoes);
 
-        fclose(arq);
 
     } while (terminar() != 'S');
 
