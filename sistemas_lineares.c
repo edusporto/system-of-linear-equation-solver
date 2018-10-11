@@ -234,19 +234,23 @@ int main(void) {
         fscanf(arq, "%d", &qtdEquacoes);
         fgetc(arq); /* Le o caracter de nova linha */
 
-        /* ALOCANDO MEMORIA PARA O VETOR DE LISTA QUE GUARDA AS INCOGNITAS */
+        /* Aloca memoria para o vetor de equacoes */
         equacoes = (Lista*)malloc(sizeof(Lista) * qtdEquacoes);
+        /* Instancia as equacoes do vetor */
+        for (i=0; i<qtdEquacoes; i++) {
+            *(equacoes + i) = lista_new();
+        }
 
         for (i=0; i<qtdEquacoes; i++) {
             *(buffer) = '\0';
             *(linha)  = '\0';
 
+            /* Escreve a equacao atual em uma string, porem, sem os espacos */
             while(atual = fgetc(arq), atual != '\n' && !feof(arq)) {
                 if (atual == ' ')
                     continue;
 
                 *(caracterEmString)     = atual;
-                *(caracterEmString + 1) = '\0';
 
                 strncat(linha, caracterEmString, 1024 - strlen(linha));
             }
@@ -265,16 +269,18 @@ int main(void) {
                 if (ENTRE(atual, '0', '9') || atual == '.' ||
                     atual == '+'           || atual == '-') {
 
+                    /* O PROGRAMA ESTA LENDO UM COEFICIENTE OU O TERMO INDEPENDENTE */
+
                     if (incognita_atual.nome == NULL || incognita_atual.nome == NULL + 1) {
                         /* o coeficiente de uma incognita ou termo independente esta sendo lido */
-                        *(caracterEmString)     = atual;
+                        *(caracterEmString) = atual;
                         strncat(buffer, caracterEmString, 1024 - strlen(buffer));
                         continue;
                     } else {
                         /* o coeficiente de uma nova incognite esta sendo lido */
                         int tamanho_nome             = strlen(buffer);
-                        incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
-                        incognita_atual.tamanho_nome = tamanho_linha+1;
+                        incognita_atual.nome         = (char*)malloc(tamanho_nome+1);
+                        incognita_atual.tamanho_nome = tamanho_nome+1;
                         strcpy(incognita_atual.nome, buffer);
                         lista_inserir_fim(equacoes+i, (void*)(&incognita_atual), sizeof(incognita_atual));
                         *(buffer) = '\0';
@@ -287,10 +293,10 @@ int main(void) {
                 }
 
                 if (atual == '=') {
-                    /* o programa esta lendo o termo independente */
+                    /* O PROGRAMA ESTA LENDO O INICIO DE UM TERMO INDEPENDENTE */
                     int tamanho_nome             = strlen(buffer);
-                    incognita_atual.nome         = (char*)malloc(tamanho_linha+1);
-                    incognita_atual.tamanho_nome = tamanho_linha+1;
+                    incognita_atual.nome         = (char*)malloc(tamanho_nome+1);
+                    incognita_atual.tamanho_nome = tamanho_nome+1;
                     strcpy(incognita_atual.nome, buffer);
                     lista_inserir_fim(equacoes+i, (void*)(&incognita_atual), sizeof(incognita_atual));
                     *(buffer) = '\0';
@@ -298,63 +304,57 @@ int main(void) {
                     continue;
                 }
 
-                /* FALTA LER O NOME DA INCOGNITA, TRATAR CASO NAO HA COEFICIENTE PARA UMA INCOGNITA */
+                /* O PROGRAMA ESTA LENDO O NOME DE UMA INCOGNITA */
 
-                /* o programa esta lendo o nome de uma incognita */
-                //incognita_atual.coeficiente = atof(buffer);
+                if (*(buffer) == '\0' ||
+                    (*(buffer) == '+' && *(buffer+1) == '\0')) {
+                    /* nao ha numero indicando o coeficiente da incognita sendo lida */
+                    /*incognita_atual.coeficiente = 1;*/
+                    *(buffer)   = '1';
+                    *(buffer+1) = '\0';
+                }
 
+                if (*(buffer) == '-' && *(buffer+1) == '\0') {
+                    /* nao ha numero indicando o coeficiente da incognita sendo lida */
+                    /* porem, ha um menos indicando que o coeficiente eh negativo */
+                    /*incognita_atual.coeficiente = -1;*/
+                    *(buffer) = '-';
+                    *(buffer+1) = '1';
+                    *(buffer+2) = '\0';
+                }
+
+                if (ENTRE(*(buffer), '0', '9') || *(buffer) == '+' || *(buffer) == '-') {
+                    /* verifica se um numero estava sendo lido antes do nome */
+                    incognita_atual.coeficiente = atof(buffer);
+                    *(buffer) = '\0';
+                }
+
+                incognita_atual.nome        = buffer;
+                *(caracterEmString) = atual;
+                strncat(buffer, caracterEmString, 1024 - strlen(buffer));
             }
+
+            /* configurando o termo independente pra ser inserido na equacao */
+            char* nomeFinal = (char*)malloc(sizeof(char) * 4);
+            strcpy(nomeFinal, "FIM");
+            incognita_atual.nome         = nomeFinal;
+            incognita_atual.tamanho_nome = sizeof(char) * 4;
+            incognita_atual.coeficiente  = atof(buffer);
+
+            /* ja foi lida toda a equacao, falta guardar o termo independente */
+            lista_inserir_fim(equacoes+i, (void*)(&incognita_atual), sizeof(incognita_atual));
 
         }
 
-            // METODO ANTIGO
-            // while (atual = fgetc(arq),
-            //        ENTRE(atual, '0', '9') ||
-            //        atual == '.') {
-            //     /* caso o programa esteja aqui, um numero
-            //      * esta sendo lido */
-
-            //     *(caracterEmString)     = atual;
-            //     *(caracterEmString + 1) = '\0';
-            //     strncat(buffer, caracterEmString, 1024 - strlen(buffer));
-            // }
-
-            // if (*buffer == '\0')
-            //     numeroAtual = 1;
-            // else
-            //     numeroAtual = atof(buffer);
-            /* quando o programa chega aqui, deve-se ler o nome da variavel do numero lido */
-
-
-//            OUTRO METODO ANTIGO
-//            atual = fgetc(arq);
-//            while (atual != '\n' && !feof(arq)) {
-//                *(buffer) = '\0';
-//                if (ENTRE(atual, '0', '9') || atual == '-' || atual == '+') {
-//                    /* esta lendo um numero */
-//                    ungetc(atual, arq);
-//                    fscanf(arq, "%lf", &numeroAtual);
-//                    printf("%lf\n", numeroAtual);
-//                    atual = fgetc(arq);
-//                }
-//                else
-//                if (atual != '=') {
-//                    /* esta lendo um nome de variavel */
-//                    ungetc(atual, arq);
-//                    while (atual = fgetc(arq), atual != '+' && atual != '-' && atual != '=') {
-//                        *(caracterEmString)     = atual;
-//                        *(caracterEmString + 1) = '\0';
-//                        strncat(buffer, caracterEmString, 1024 - strlen(buffer));
-//                        printf("%s", buffer);
-//                    }
-//                }
-//
-//            }
-
-
-        //printf("%lf %s", numeroAtual, buffer);
-
-
+        /* sera removido: escreve os valores das equacoes */
+        No* at;
+        for (i=0; i<qtdEquacoes; i++) {
+            at = equacoes[i].prim;
+            while (at != NULL) {
+                printf("%lf, %s, %d\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
+                at = at->prox;
+            }
+        }
 
         /* LEMBRAR DE DESALOCAR MEMORIA */
         free(equacoes);
