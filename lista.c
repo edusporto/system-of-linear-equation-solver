@@ -68,6 +68,8 @@ void* lista_get_item(Lista* lis, int index) {
     return NULL;
 }
 
+/* retorna  1 em caso de sucesso
+ * retorna -1 em caso de falha   */
 char lista_remover_primeiro(Lista* lis) {
     No* atual;
 
@@ -85,6 +87,8 @@ char lista_remover_primeiro(Lista* lis) {
     return 1;
 }
 
+/* retorna  1 em caso de sucesso
+ * retorna -1 em caso de falha   */
 char lista_remover_ultimo(Lista* lis) {
     No* atual;
     No* anterior;
@@ -144,4 +148,50 @@ char lista_remover_item(Lista* lis, int index) {
     free(atual);
 
     return 1;
+}
+
+void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int (*compareTo) (void*, void*)) {
+    No* novo;
+
+    if (lis->prim == NULL)
+    {
+        novo = (No*)malloc(sizeof (No));
+        novo->info = valor;
+        novo->prox = NULL;
+        novo->tamanho = tamanho_valor;
+
+        lis->prim = novo;
+        lis->ult  = novo;
+        return;
+    }
+
+    if (compareTo(valor, lis->prim->info) < 0)
+    {
+        novo = (No*)malloc(sizeof (No));
+        novo->info = valor;
+        novo->prox = lis->prim;
+        novo->tamanho = tamanho_valor;
+
+        lis->prim = novo;
+        return;
+    }
+
+    No* atual = lis->prim;
+    while (atual->prox != NULL && compareTo(valor, atual->prox->info) > 0)
+        atual = atual->prox;
+
+    if (atual->prox != NULL) {
+        if (compareTo(atual, atual->prox->info) == 0)
+            return;
+    }
+
+    novo = (No*)malloc(sizeof (No));
+    novo->info = valor;
+    novo->tamanho = tamanho_valor;
+    
+    novo->prox = atual->prox;
+    if (atual == lis->ult)
+        lis->ult = novo;
+
+    atual->prox = novo;
 }

@@ -32,6 +32,10 @@ char terminar() {
     return toupper(resp);
 }
 
+int compare_to(void* string1, void* string2) {
+    return strcmp((char*)string1, (char*)string2);
+}
+
 /* =========================================================== */
 /*               FUNCOES PRINCIPAIS E FUNCAO MAIN              */
 /* =========================================================== */
@@ -60,7 +64,7 @@ Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
         *(linha)  = '\0';
 
         /* Escreve a equacao atual em uma string, porem, sem os espacos */
-        while(atual = fgetc(arq), atual != '\n' && !feof(arq)) {
+        while (atual = fgetc(arq), atual != '\n' && !feof(arq)) {
             if (atual == ' ')
                 continue;
 
@@ -169,6 +173,7 @@ int main(void) {
     char nomeArq[MAX_NOMEARQ];
     double** m_coeficientes, m_termosIndependentes;
     Lista* equacoes; /* eh um vetor */
+    Lista  nome_incognitas;
     int i, j, qtdEquacoes;
     FILE* arq;
 
@@ -190,17 +195,22 @@ int main(void) {
         fscanf(arq, "%d", &qtdEquacoes);
         fgetc(arq); /* Le o caracter de nova linha */
 
+        /* a memoria para este vetor eh dentro da funcao */
         equacoes = ler_equacoes(arq, qtdEquacoes);
 
         /* O arquivo nao eh mais necessario, pode ser fechado */
         fclose(arq);
+
+        
+
+
 
         /* sera removido: escreve os valores das equacoes */
         No* at;
         for (i=0; i<qtdEquacoes; i++) {
             at = equacoes[i].prim;
             while (at != NULL) {
-                printf("%lf, %s, %d\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
+                printf("%lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
                 at = at->prox;
             }
         }
@@ -221,7 +231,6 @@ int main(void) {
             }
             while (lista_remover_primeiro(&lis_atual) != -1)
                 ;
-            free(equacoes+i);
         }
         free(equacoes);
 

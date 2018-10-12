@@ -1,5 +1,6 @@
 #ifndef LISTA_H
 #define LISTA_H
+#include <stdlib.h>
 
     typedef
         struct No {
@@ -29,5 +30,7 @@
     char lista_remover_ultimo(Lista* lis);
 
     char lista_remover_item(Lista* lis, int index);
+
+    void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int (*compareTo) (void*, void*));
 
 #endif
