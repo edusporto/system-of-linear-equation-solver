@@ -152,13 +152,14 @@ char lista_remover_item(Lista* lis, int index) {
 
 void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int (*compareTo) (void*, void*)) {
     No* novo;
+    void* copia;
 
     if (lis->prim == NULL)
     {
         novo = (No*)malloc(sizeof (No));
-        novo->info = valor;
-        novo->prox = NULL;
-        novo->tamanho = tamanho_valor;
+        copia = malloc(tamanho_valor);
+        memcpy(copia, valor, tamanho_valor);
+        no_inicializa(novo, copia, tamanho_valor, NULL);
 
         lis->prim = novo;
         lis->ult  = novo;
@@ -168,9 +169,9 @@ void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int 
     if (compareTo(valor, lis->prim->info) < 0)
     {
         novo = (No*)malloc(sizeof (No));
-        novo->info = valor;
-        novo->prox = lis->prim;
-        novo->tamanho = tamanho_valor;
+        copia = malloc(tamanho_valor);
+        memcpy(copia, valor, tamanho_valor);
+        no_inicializa(novo, copia, tamanho_valor, lis->prim);
 
         lis->prim = novo;
         return;
@@ -180,16 +181,19 @@ void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int 
     while (atual->prox != NULL && compareTo(valor, atual->prox->info) > 0)
         atual = atual->prox;
 
+    if (compareTo(valor, atual->info) == 0)
+        return;
+
     if (atual->prox != NULL) {
-        if (compareTo(atual, atual->prox->info) == 0)
+        if (compareTo(valor, atual->prox->info) == 0)
             return;
     }
 
     novo = (No*)malloc(sizeof (No));
-    novo->info = valor;
-    novo->tamanho = tamanho_valor;
+    copia = malloc(tamanho_valor);
+    memcpy(copia, valor, tamanho_valor);
+    no_inicializa(novo, copia, tamanho_valor, atual->prox);
     
-    novo->prox = atual->prox;
     if (atual == lis->ult)
         lis->ult = novo;
 

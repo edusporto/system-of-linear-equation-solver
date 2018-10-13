@@ -153,10 +153,11 @@ Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
         }
 
         /* configurando o termo independente pra ser inserido na equacao */
-        char* nomeFinal = (char*)malloc(sizeof(char) * 4);
-        strcpy(nomeFinal, "FIM");
+        /* o nome do termo independente sera " ", um espaco em branco */
+        char* nomeFinal = (char*)malloc(sizeof(char) * 2);
+        strcpy(nomeFinal, " ");
         incognita_atual.nome         = nomeFinal;
-        incognita_atual.tamanho_nome = sizeof(char) * 4;
+        incognita_atual.tamanho_nome = sizeof(char) * 2;
         incognita_atual.coeficiente  = atof(buffer);
 
         /* ja foi lida toda a equacao, falta guardar o termo independente */
@@ -176,6 +177,7 @@ int main(void) {
     Lista  nome_incognitas;
     int i, j, qtdEquacoes;
     FILE* arq;
+    No* no_atual;
 
     printf("=============================================\n");
     printf(" Resolvedor de sistemas de equacoes lineares \n");
@@ -201,16 +203,32 @@ int main(void) {
         /* O arquivo nao eh mais necessario, pode ser fechado */
         fclose(arq);
 
-        
+        /* todas os nomes de incognitas agora serao colocados em uma lista */
+        for (i=0; i<qtdEquacoes; i++) {
+            no_atual = (equacoes+i)->prim;
+            while (no_atual != NULL) {
+                lista_inserir_ordenado(&nome_incognitas,
+                                       (void*)(((Incognita*)no_atual->info)->nome),
+                                       ((Incognita*)no_atual->info)->tamanho_nome,
+                                       compare_to);
+                no_atual = no_atual->prox;
+            }
+        }
 
-
+        /* sera removido: escreve o nome de todas as incognitas */
+        No* aa;
+        aa = nome_incognitas.prim;
+        while (aa != NULL) {
+            printf("%s\n", (char*)aa->info);
+            aa = aa->prox;
+        }
 
         /* sera removido: escreve os valores das equacoes */
         No* at;
         for (i=0; i<qtdEquacoes; i++) {
             at = equacoes[i].prim;
             while (at != NULL) {
-                printf("%lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
+                printf("%.3lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
                 at = at->prox;
             }
         }
