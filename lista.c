@@ -15,7 +15,8 @@ void no_inicializa(No* n, void* info, size_t tamanho, No* prox) {
 Lista lista_new() {
     Lista ret;
     ret.prim = NULL;
-    ret.ult   = NULL;
+    ret.ult  = NULL;
+    ret.qtd  = 0;
     return ret;
 }
 
@@ -26,6 +27,7 @@ void lista_inserir_fim(Lista* lis, void* valor, size_t tamanho_valor) {
     No* novo = (No*)malloc(sizeof(No));
 
     no_inicializa(novo, copia, tamanho_valor, NULL);
+    lis->qtd++;
 
     if (lis->prim == NULL) {
         lis->prim = novo;
@@ -44,6 +46,7 @@ void lista_inserir_inicio(Lista* lis, void* valor, size_t tamanho_valor) {
     No* novo = (No*)malloc(sizeof(No));
 
     no_inicializa(novo, copia, tamanho_valor, lis->prim);
+    lis->qtd++;
 
     if (lis->prim == NULL)
         lis->ult = novo;
@@ -76,6 +79,8 @@ char lista_remover_primeiro(Lista* lis) {
     if (lis->prim == NULL)
         return -1;
 
+    lis->qtd--;
+
     if (lis->prim == lis->ult)
         lis->ult = NULL;
 
@@ -95,6 +100,8 @@ char lista_remover_ultimo(Lista* lis) {
 
     if (lis->prim == NULL)
         return -1;
+
+    lis->qtd--;
 
     if (lis->prim->prox == NULL) {
         free(lis->prim->info);
@@ -127,7 +134,7 @@ char lista_remover_item(Lista* lis, int index) {
     No* anterior = NULL;
     int i;
 
-    if (index < 0)
+    if (index < 0 || index >= lis->qtd)
         return -1;
 
     if (index == 0)
@@ -139,6 +146,8 @@ char lista_remover_item(Lista* lis, int index) {
         anterior = atual;
         atual = atual->prox;
     }
+
+    lis->qtd--;
 
     if (atual == lis->ult)
         lis->ult = anterior;
@@ -163,6 +172,7 @@ void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int 
 
         lis->prim = novo;
         lis->ult  = novo;
+        lis->qtd++;
         return;
     }
 
@@ -174,6 +184,7 @@ void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int 
         no_inicializa(novo, copia, tamanho_valor, lis->prim);
 
         lis->prim = novo;
+        lis->qtd++;
         return;
     }
 
@@ -192,8 +203,10 @@ void lista_inserir_ordenado (Lista* lis, void* valor, size_t tamanho_valor, int 
     novo = (No*)malloc(sizeof (No));
     copia = malloc(tamanho_valor);
     memcpy(copia, valor, tamanho_valor);
+
     no_inicializa(novo, copia, tamanho_valor, atual->prox);
-    
+    lis->qtd++;
+
     if (atual == lis->ult)
         lis->ult = novo;
 

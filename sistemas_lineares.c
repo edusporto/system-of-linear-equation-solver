@@ -172,7 +172,8 @@ Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
 
 int main(void) {
     char nomeArq[MAX_NOMEARQ];
-    double** m_coeficientes, m_termosIndependentes;
+    double** m_coeficientes;
+    double*  m_termosIndependentes;
     Lista* equacoes; /* eh um vetor */
     Lista  nome_incognitas;
     int i, j, qtdEquacoes;
@@ -203,6 +204,7 @@ int main(void) {
         /* O arquivo nao eh mais necessario, pode ser fechado */
         fclose(arq);
 
+        nome_incognitas = lista_new();
         /* todas os nomes de incognitas agora serao colocados em uma lista */
         for (i=0; i<qtdEquacoes; i++) {
             no_atual = (equacoes+i)->prim;
@@ -233,13 +235,52 @@ int main(void) {
             }
         }
 
+        /* sera verificado se o sistema eh valido, e serao instanciadas a matriz
+         * de coeficiente e a matriz de termos independentes */
+        if (nome_incognitas.qtd-1 != qtdEquacoes) {
+            printf("\nEste sistema nao e um SPD (Sistema Possivel Determinado)\n");
+        } else {
+            /* instanciando a matriz de coeficientes e a de termos independentes */
+            m_coeficientes = (double**)malloc(sizeof(double*) * qtdEquacoes);
+            for (i=0; i<nome_incognitas.qtd; i++) {
+                *(m_coeficientes+i) = (double*)malloc(sizeof(double) * (nome_incognitas.qtd-1));
+            }
+            m_termosIndependentes = (double*)malloc(sizeof(double) * qtdEquacoes);
+
+            j=0;
+            No* no_aux;
+            Incognita* incognita_atual;
+            for (i=0; i<qtdEquacoes; i++) {
+                no_atual = (equacoes+i)->prim;
+                while (no_atual != NULL) {
+                    incognita_atual = ((Incognita*)no_atual->info);
+                    if (strcmp(incognita_atual->nome, " ") == 0) {
+                        *(m_termosIndependentes+i) = incognita_atual->coeficiente;
+                        no_atual = no_atual->prox;
+                        continue;
+                    }
+                    no_aux = nome_incognitas.prim;
+                    while (no_aux != NULL) {
+                        if (strcmp(((Incognita*)no_aux->info)->nome, 
+                                   ((Incognita*)no_atual->info)->nome) == 0) {
+                            *(*(m_coeficientes+i)+j) = ((Incognita*)no_aux->info)->coeficiente;
+                            break;
+                        }
+                        j++;
+                        no_aux = no_aux->prox;
+                    }
+                    no_atual = no_atual->prox;
+                }
+            }
+        }
 
 
+        
         /* LIBERACAO DE MEMORIA */
         Lista     lis_atual;
         Incognita inc_atual;
         No*       no_atual;
-        for (i=0; i<qtdEquacoes; i++) {
+        fim: for (i=0; i<qtdEquacoes; i++) {
             lis_atual = *(equacoes+i);
             no_atual = lis_atual.prim;
             while (no_atual != NULL) {
@@ -251,7 +292,9 @@ int main(void) {
                 ;
         }
         free(equacoes);
-
+        
+        while(lista_remover_primeiro(&nome_incognitas) != -1)
+            ;
 
     } while (terminar() != 'S');
 
