@@ -13,6 +13,7 @@
         struct {
             No* prim;
             No* ult;
+            int qtd;
         } Lista;
 
     void no_inicializa(No* n, void* info, size_t tamanho, No* prox);
