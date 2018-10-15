@@ -83,7 +83,7 @@ double determinante(double** matriz, int ordem) {
 
 /* RETORNA UM VETOR DE LISTA, CADA LISTA CONTENDO UMA EQUACAO */
 Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
-    char linha[1024];
+    char linha[2048];
     char buffer[1024];
     char caracterEmString[2];
     char atual;
@@ -111,7 +111,7 @@ Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
 
             *(caracterEmString) = atual;
 
-            strncat(linha, caracterEmString, 1024 - strlen(linha));
+            strncat(linha, caracterEmString, 2048 - strlen(linha));
         }
 
         /* valores possiveis de incognita atual:
@@ -257,9 +257,9 @@ int main(void) {
             }
         }
 
-        
+
         /*
-        ESCREVE O NOME DE TODAS AS INCOGNITAS 
+        ESCREVE O NOME DE TODAS AS INCOGNITAS
         No* aa;
         aa = nome_incognitas.prim;
         while (aa != NULL) {
@@ -302,6 +302,7 @@ int main(void) {
                 while (no_atual != NULL) {
                     incognita_atual = ((Incognita*)no_atual->info);
                     if (strcmp(incognita_atual->nome, " ") == 0) {
+                        /* esta lendo um termo independente */
                         *(m_termosIndependentes+i) = incognita_atual->coeficiente;
                         no_atual = no_atual->prox;
                         continue;
@@ -310,9 +311,11 @@ int main(void) {
                     j=-1;
                     no_aux = nome_incognitas.prim;
                     while (no_aux != NULL) {
-                        char* a = (char*)no_aux->info;
-                        char* b = ((Incognita*)no_atual->info)->nome;
-                        if (strcmp(a, b) == 0) {
+                        /* esta lendo o nome de uma variavel para guardar seu coeficiente
+                         * na matriz de coeficientes;
+                        char* incognita_procurando = (char*)no_aux->info;
+                        char* incognita_atual = ((Incognita*)no_atual->info)->nome;
+                        if (strcmp(incognita_procurando, incognita_atual) == 0) {
                             *(*(m_coeficientes+i)+j) = ((Incognita*)no_atual->info)->coeficiente;
                             break;
                         }
@@ -338,10 +341,9 @@ int main(void) {
             }
             */
 
-
             /* A PARTIR DAQUI, O RESULTADO DO SISTEMA SERA CALCULADO */
             double det_m_coeficientes = determinante(m_coeficientes, qtdEquacoes);
-            
+
             if (det_m_coeficientes == 0) {
                 printf("\nEste sistema nao e um SPD (Sistema Possivel Determinado)\n");
             } else {
@@ -349,8 +351,12 @@ int main(void) {
                 double** m_temp = (double**)malloc(sizeof(double*) * qtdEquacoes);
                 for (i=0; i<qtdEquacoes; i++)
                     *(m_temp+i) = (double*)malloc(sizeof(double) * qtdEquacoes);
-            
+
+                no_atual = nome_incognitas.prim;
+                no_atual = no_atual->prox; /* o primeiro valor eh o termo independente */
                 printf("\nRESULTADO:\n");
+                /* ESCREVENDO A MATRIZ COM OS TERMOS INDEPENDENTES NO LUGAR DA COLUNA
+                 * DA INCOGNITA ATUAL, A QUAL ESTA SENDO CALCULADA A SOLUCAO */
                 for (a=0; a<qtdEquacoes; a++) {
                     for (i=0; i<qtdEquacoes; i++) {
                         for (j=0; j<qtdEquacoes; j++) {
@@ -360,10 +366,13 @@ int main(void) {
                                 *(*(m_temp+i)+j) = *(*(m_coeficientes+i)+j);
                         }
                     }
-                    printf("%s = %.3lf\n",
-                            (char*)lista_get_item(&nome_incognitas, a+1), /* NOME DA INCOGNITA ATUAL */
-                            determinante(m_temp, qtdEquacoes) / det_m_coeficientes); /* RESULTADO DA INCOGNITA ATUAL */
 
+                    /* NOME DA INCOGNITA ATUAL */
+                    printf("%s = ", (char*)no_atual->info);
+                    /* RESULTADO DA INCOGNITA ATUAL */
+                    printf("%.3lf\n", determinante(m_temp, qtdEquacoes) / det_m_coeficientes);
+
+                    no_atual = no_atual->prox;
                 }
 
                 for (i=0; i<qtdEquacoes; i++)
