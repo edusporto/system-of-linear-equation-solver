@@ -5,7 +5,10 @@
   * Made by Eduardo Sandalo Porto for the Topics in Object Oriented Programming class;
   * Colégio Técnico de Campinas - Unicamp, 2017;
   * The code is in Portuguese;
-  * Compiled using GCC.
+  * Compiled using GCC;
+  * The program has certain restrictions given by the teacher, such as:
+    * Arrays and matrices can only be accessed by pointer arithmetic;
+    * All the variables in a system of linear equations must be stored in linked lists.
 
 ### Usage
   * The equations must be in a text file;
