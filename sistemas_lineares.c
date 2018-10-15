@@ -36,6 +36,48 @@ int compare_to(void* string1, void* string2) {
     return strcmp((char*)string1, (char*)string2);
 }
 
+double determinante(double** matriz, int ordem) {
+	int    a, i, j;
+	double ret = 0;
+	int    c1, c2;
+	int    O = 1; /* representa se o cofator atual deve ser multiplicado por 1 ou -1 */
+
+	if (ordem == 2) {
+		ret = **(matriz) * *(*(matriz+1)+1) - *(*(matriz)+1) * *(*(matriz+1));
+		return ret;
+	}
+
+	double** matriz_menor = (double**)malloc(sizeof(double*)*(ordem-1));
+	for (i=0; i<ordem-1; i++)
+		*(matriz_menor+i) = (double*)malloc(sizeof(double)*(ordem-1));
+
+	for (a=0; a<ordem; a++) { /* ira percorrer a primeira linha da matriz */
+		c1 = 0, c2 = 0;
+		for (i=1; i<ordem; i++) { /* linha da matriz menor */
+			for (j=0; j<ordem; j++) { /* coluna da matriz menor */
+				if (j != a) {
+					/* ira colocar na matriz menor somente aqueles que nao pertencem
+					 * a linha e coluna do elemento cujo cofator esteja sendo calculado */
+					*(*(matriz_menor+c1)+c2) = *(*(matriz+i)+j);
+					c2++;
+					if (c2>ordem-2) {
+						c1++;
+						c2=0;
+					}
+				}
+			}
+		}
+		ret = ret + O*(*(*(matriz)+a) * determinante(matriz_menor, ordem-1));
+		O = -1*O;
+	}
+
+	for (i=0; i<(ordem-1); i++)
+		free(*(matriz_menor+i));
+	free(matriz_menor);
+
+	return ret;
+}
+
 /* =========================================================== */
 /*               FUNCOES PRINCIPAIS E FUNCAO MAIN              */
 /* =========================================================== */
@@ -217,23 +259,23 @@ int main(void) {
             }
         }
 
-        /* sera removido: escreve o nome de todas as incognitas */
-        No* aa;
-        aa = nome_incognitas.prim;
-        while (aa != NULL) {
-            printf("%s\n", (char*)aa->info);
-            aa = aa->prox;
-        }
+        // /* sera removido: escreve o nome de todas as incognitas */
+        // No* aa;
+        // aa = nome_incognitas.prim;
+        // while (aa != NULL) {
+        //     printf("%s\n", (char*)aa->info);
+        //     aa = aa->prox;
+        // }
 
-        /* sera removido: escreve os valores das equacoes */
-        No* at;
-        for (i=0; i<qtdEquacoes; i++) {
-            at = equacoes[i].prim;
-            while (at != NULL) {
-                printf("%.3lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
-                at = at->prox;
-            }
-        }
+        // /* sera removido: escreve os valores das equacoes */
+        // No* at;
+        // for (i=0; i<qtdEquacoes; i++) {
+        //     at = equacoes[i].prim;
+        //     while (at != NULL) {
+        //         printf("%.3lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
+        //         at = at->prox;
+        //     }
+        // }
 
         /* sera verificado se o sistema eh valido, e serao instanciadas a matriz
          * de coeficiente e a matriz de termos independentes */
@@ -242,12 +284,16 @@ int main(void) {
         } else {
             /* instanciando a matriz de coeficientes e a de termos independentes */
             m_coeficientes = (double**)malloc(sizeof(double*) * qtdEquacoes);
-            for (i=0; i<nome_incognitas.qtd; i++) {
-                *(m_coeficientes+i) = (double*)malloc(sizeof(double) * (nome_incognitas.qtd-1));
+            for (i=0; i<qtdEquacoes; i++) {
+                *(m_coeficientes+i) = (double*)malloc(sizeof(double) * (qtdEquacoes));
+                for (j=0; j<qtdEquacoes; j++) {
+                    /* colocando o valor inicial de cada posicao da matriz de
+                     * coeficientes como 0 */
+                    *(*(m_coeficientes+i) + j) = 0;
+                }
             }
             m_termosIndependentes = (double*)malloc(sizeof(double) * qtdEquacoes);
 
-            j=0;
             No* no_aux;
             Incognita* incognita_atual;
             for (i=0; i<qtdEquacoes; i++) {
@@ -259,11 +305,14 @@ int main(void) {
                         no_atual = no_atual->prox;
                         continue;
                     }
+
+                    j=-1;
                     no_aux = nome_incognitas.prim;
                     while (no_aux != NULL) {
-                        if (strcmp(((Incognita*)no_aux->info)->nome, 
-                                   ((Incognita*)no_atual->info)->nome) == 0) {
-                            *(*(m_coeficientes+i)+j) = ((Incognita*)no_aux->info)->coeficiente;
+                        char* a = (char*)no_aux->info;
+                        char* b = ((Incognita*)no_atual->info)->nome;
+                        if (strcmp(a, b) == 0) {
+                            *(*(m_coeficientes+i)+j) = ((Incognita*)no_atual->info)->coeficiente;
                             break;
                         }
                         j++;
@@ -272,10 +321,45 @@ int main(void) {
                     no_atual = no_atual->prox;
                 }
             }
+
+            printf("\nMatriz de coeficientes:\n");
+            for (i=0; i<qtdEquacoes; i++) {
+                for (j=0; j<nome_incognitas.qtd-1; j++) {
+                    printf("%.3lf ", m_coeficientes[i][j]);
+                }
+                printf("\n");
+            }
+
+            printf("\nMatriz dos termos independentes:\n");
+            for (i=0; i<qtdEquacoes; i++) {
+                printf("%lf\n", m_termosIndependentes[i]);
+            }
+
+
+            /* A PARTIR DAQUI, O RESULTADO DO SISTEMA SERA CALCULADO */
+            double det_m_coeficientes = determinante(m_coeficientes, qtdEquacoes);
+            
+            if (det_m_coeficientes == 0) {
+                printf("\nEste sistema nao e um SPD (Sistema Possivel Determinado)\n");
+            } else {
+                double** m_temp = (double**)malloc(sizeof(double*) * qtdEquacoes);
+                for (i=0; i<qtdEquacoes; i++)
+                    *(m_temp+i) = (double*)malloc(sizeof(double) * qtdEquacoes);
+            
+                //for (i=0; i<)
+            }
+
+
+            /* LIBERACAO DE MEMORIA - MATRIZES */
+            for (i=0; i<qtdEquacoes; i++) {
+                free(*(m_coeficientes+i));
+            }
+            free(m_coeficientes);
+            free(m_termosIndependentes);
         }
 
-
         
+
         /* LIBERACAO DE MEMORIA */
         Lista     lis_atual;
         Incognita inc_atual;
@@ -292,7 +376,7 @@ int main(void) {
                 ;
         }
         free(equacoes);
-        
+
         while(lista_remover_primeiro(&nome_incognitas) != -1)
             ;
 
