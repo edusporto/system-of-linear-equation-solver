@@ -1,0 +1,5 @@
+4
+3george + 5roberto + astolfo  + 2fernando = 1
+3george - roberto  + 3astolfo + fernando  = 1
+5george + roberto  + 2astolfo - fernando  = 0
+-george + 3roberto + astolfo  + 3fernando = 3

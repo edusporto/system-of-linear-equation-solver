@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
 #include "lista.c"
 
 #define MAX_NOMEARQ 256
@@ -211,7 +210,6 @@ Lista* ler_equacoes (FILE* arq, int qtdEquacoes) {
 
 
 
-
 int main(void) {
     char nomeArq[MAX_NOMEARQ];
     double** m_coeficientes;
@@ -259,23 +257,26 @@ int main(void) {
             }
         }
 
-        // /* sera removido: escreve o nome de todas as incognitas */
-        // No* aa;
-        // aa = nome_incognitas.prim;
-        // while (aa != NULL) {
-        //     printf("%s\n", (char*)aa->info);
-        //     aa = aa->prox;
-        // }
+        
+        /*
+        ESCREVE O NOME DE TODAS AS INCOGNITAS 
+        No* aa;
+        aa = nome_incognitas.prim;
+        while (aa != NULL) {
+            printf("%s\n", (char*)aa->info);
+            aa = aa->prox;
+        }
 
-        // /* sera removido: escreve os valores das equacoes */
-        // No* at;
-        // for (i=0; i<qtdEquacoes; i++) {
-        //     at = equacoes[i].prim;
-        //     while (at != NULL) {
-        //         printf("%.3lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
-        //         at = at->prox;
-        //     }
-        // }
+        ESCREVE AS INCOGNITAS DE TODAS AS EQUACOES
+        No* at;
+        for (i=0; i<qtdEquacoes; i++) {
+            at = equacoes[i].prim;
+            while (at != NULL) {
+                printf("%.3lf, %s, %lu\n", ((Incognita*)(at->info))->coeficiente, ((Incognita*)(at->info))->nome, ((Incognita*)(at->info))->tamanho_nome  );
+                at = at->prox;
+            }
+        }
+        */
 
         /* sera verificado se o sistema eh valido, e serao instanciadas a matriz
          * de coeficiente e a matriz de termos independentes */
@@ -322,6 +323,7 @@ int main(void) {
                 }
             }
 
+            /*
             printf("\nMatriz de coeficientes:\n");
             for (i=0; i<qtdEquacoes; i++) {
                 for (j=0; j<nome_incognitas.qtd-1; j++) {
@@ -334,6 +336,7 @@ int main(void) {
             for (i=0; i<qtdEquacoes; i++) {
                 printf("%lf\n", m_termosIndependentes[i]);
             }
+            */
 
 
             /* A PARTIR DAQUI, O RESULTADO DO SISTEMA SERA CALCULADO */
@@ -342,13 +345,31 @@ int main(void) {
             if (det_m_coeficientes == 0) {
                 printf("\nEste sistema nao e um SPD (Sistema Possivel Determinado)\n");
             } else {
+                int a;
                 double** m_temp = (double**)malloc(sizeof(double*) * qtdEquacoes);
                 for (i=0; i<qtdEquacoes; i++)
                     *(m_temp+i) = (double*)malloc(sizeof(double) * qtdEquacoes);
             
-                //for (i=0; i<)
-            }
+                printf("\nRESULTADO:\n");
+                for (a=0; a<qtdEquacoes; a++) {
+                    for (i=0; i<qtdEquacoes; i++) {
+                        for (j=0; j<qtdEquacoes; j++) {
+                            if (j==a)
+                                *(*(m_temp+i)+j) = *(m_termosIndependentes+i);
+                            else
+                                *(*(m_temp+i)+j) = *(*(m_coeficientes+i)+j);
+                        }
+                    }
+                    printf("%s = %.3lf\n",
+                            (char*)lista_get_item(&nome_incognitas, a+1), /* NOME DA INCOGNITA ATUAL */
+                            determinante(m_temp, qtdEquacoes) / det_m_coeficientes); /* RESULTADO DA INCOGNITA ATUAL */
 
+                }
+
+                for (i=0; i<qtdEquacoes; i++)
+                    free(*(m_temp+i));
+                free(m_temp);
+            }
 
             /* LIBERACAO DE MEMORIA - MATRIZES */
             for (i=0; i<qtdEquacoes; i++) {
@@ -357,8 +378,6 @@ int main(void) {
             free(m_coeficientes);
             free(m_termosIndependentes);
         }
-
-        
 
         /* LIBERACAO DE MEMORIA */
         Lista     lis_atual;
