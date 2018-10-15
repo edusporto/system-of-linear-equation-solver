@@ -313,6 +313,8 @@ int main(void) {
                     while (no_aux != NULL) {
                         /* esta lendo o nome de uma variavel para guardar seu coeficiente
                          * na matriz de coeficientes;
+                         * compara o nome da variavel atual com a lista de nome de incognitas
+                         * para saber em que coluna da matriz inserir o coeficiente */
                         char* incognita_procurando = (char*)no_aux->info;
                         char* incognita_atual = ((Incognita*)no_atual->info)->nome;
                         if (strcmp(incognita_procurando, incognita_atual) == 0) {
