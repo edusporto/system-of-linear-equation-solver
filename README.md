@@ -13,7 +13,7 @@
 ### Usage
   * The equations must be in a text file;
   * The first line of the line contains an integer, which corresponds to the number of equations to read;
-  * The following lines contain the equations in the following format:
+  * The following lines contain the equations in the required format:
     * nameone + nametwo = 1
     * 2nameone - nametwo = -1
   * The numbers can be any double value, which can be written using '.';
